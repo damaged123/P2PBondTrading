@@ -67,7 +67,7 @@ def crawl_investment_individual(): # 개인 채권 홈페이지를 크롤링한�
     https://8percent.kr/deals/individual
     html정보 전체를 가져온다. 
     '''
-
+    
     #해드리스 상태 http://blog.naver.com/PostView.nhn?blogId=baek2sm&logNo=221425659595&parentCategoryNo=&categoryNo=18&viewDate=&isShowPopularPosts=true&from=search
     chrome_options = webdriver.ChromeOptions() #
     chrome_options.add_argument('headless')
