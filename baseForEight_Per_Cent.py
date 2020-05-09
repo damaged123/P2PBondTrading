@@ -8,9 +8,9 @@ def crawl_Eight_Per_Cent():
     driver.get('https://8percent.kr/user/login/')
     ## 아이디/비밀번호를 입력해준다.
     sleep(0.5)
-    driver.find_element_by_name('email').send_keys("?????")
+    driver.find_element_by_name('email').send_keys("???")
     sleep(0.5)
-    driver.find_element_by_name('password').send_keys("?????")
+    driver.find_element_by_name('password').send_keys("???")
     sleep(0.5)
     ## 로그인 버튼을 눌러주자.
     driver.find_element_by_xpath('//*[@id="submitbutton"]').click()
@@ -38,7 +38,7 @@ crawl_investment_individual()는 인자가 비어 있을 함수이다. 개인신
 
                 find_Credit_index_in_string(test_text) 위 함수에서 신용점수정보를 정재한다.  Credit = find_Credit_index_in_string(test_text)
 
-                find_debt_index_in_string(test_text) 위 함수에서 채무유형을 축출한다. Dedts = find_debt_index_in_string(test_text)
+                find_debt_index_in_string(test_text) 위 함수에서 채무유형을 축출한다. Debts = find_debt_index_in_string(test_text)
 
                 sum_of_debt(test_text)는 사용하는 함수가 아니다. 총 채무정보를 축출한다. "미정"
 
@@ -48,15 +48,13 @@ crawl_investment_individual()는 인자가 비어 있을 함수이다. 개인신
 
                 get_missing_date(test_text) 부채유형의 합과 총 부채수의 합을 구한다. 누락된 채무정보를 알 수 있다. "미정"
 
+                Debt_Calculation(Debts, Credit) 채무마다 이자비용을 신용등급에 반영해서 추산한다. 
+
                 OverHead(test_text) 채권의 안정성을 지표화한다. 추산은 10년만기에 24%이율로 한다(문제는 신용대출은 이자가 높지만 부동산담보는 따로 추산할 필요가 있다. 추가 대출로 받게 될 이자를 미 반영했다.). OverHead = OverHead(test_text)
 
                 find_P2P_debt(test_text) P2P 채무유형의 유무를 확인한다. 
 
-                interestAndOverHead() 수익과 안정성을 비교한다. 
-
-                    ???() 순수하게 안정적인 순서, 안정성대비 수익률 순서
-                해드릴스 크롤링 방법
-                http://blog.naver.com/PostView.nhn?blogId=baek2sm&logNo=221425659595&parentCategoryNo=&categoryNo=18&viewDate=&isShowPopularPosts=true&from=search
+                
 
                 ???() 엑셀파일로 출력한다. 
 '''
@@ -67,7 +65,7 @@ def crawl_investment_individual(): # 개인 채권 홈페이지를 크롤링한�
     https://8percent.kr/deals/individual
     html정보 전체를 가져온다. 
     '''
-    
+
     #해드리스 상태 http://blog.naver.com/PostView.nhn?blogId=baek2sm&logNo=221425659595&parentCategoryNo=&categoryNo=18&viewDate=&isShowPopularPosts=true&from=search
     chrome_options = webdriver.ChromeOptions() #
     chrome_options.add_argument('headless')
@@ -128,6 +126,14 @@ def Get_individual_data(name, n):
     
     # 채권심사를 위해 
     Bond_name = name[n][0:5] #현재 for문을 사용하지 않는다. 
+
+    chrome_options = webdriver.ChromeOptions() #
+    chrome_options.add_argument('headless')
+    options = webdriver.ChromeOptions()
+    options.add_argument("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36")
+    driver = webdriver.Chrome('/Users/kimsanghyun/Lets_Get_rich/ZZ_chromedriver/chromedriver',chrome_options=options)
+    driver.implicitly_wait(2)
+
     # 8퍼센트 포크폴리오 분석
     driver.get('https://8percent.kr/deals/' + str(Bond_name)) #
     html = driver.page_source
@@ -248,23 +254,7 @@ def get_missing_date(test_text): #print를 반환하므로 데이터는 비어�
     else:
         print('누락된 채무유형이 있음') 
 
-def OverHead(test_text): #24%최대 이자로 일률적으로 적용하며 10년 만기로 설정한다. 추산이자채무상환액 = 원금/12*10(10년만기균등상환)+원금*3%이자(이자비용+ 쿠션1%)
-    #추가 대출금에 다한 반영X
-    Income = find_Income_index_in_string(test_text)[0]
-    Income = Income.replace('만원','')
-    Income = Income.replace(',','')
-    Income = int(Income)
-    Expense = find_Expense_index_in_string(test_text)[0]
-    Expense = Expense.replace('만원','')
-    Expense = Expense.replace(',','')
-    Expense = int(Expense)
-    interest = sum_of_debt(test_text)[-1]
-    interest = interest.replace('만원','')
-    interest = interest.replace(',','')
-    interest = int(interest)
-    
-    result = Income - (Expense+interest/120+interest*0.03)
-    return result
+
 
 def find_P2P_debt(test_text): #P2P채무가 있고 없는지를 알아낸다. 
     findText = find_debt_index_in_string(test_text)
@@ -278,20 +268,273 @@ def find_P2P_debt(test_text): #P2P채무가 있고 없는지를 알아낸다.
     else:
         print('P2P채무 없음')
 
-def debt_Count(test_text):
-    '''    
-    findText = find_debt_index_in_string(test_text)
-    null = []
-    for n in findText:
-        for m in n:
-            if m == '저축은행':
-                null.append(1)
-    if null == [1]:
-        
-    else:
+
+def Debt_Calculation(Debts, Credit):
+    '''
+    Debts = find_debt_index_in_string(test_text)
+    Credit = Eight_Per_Cent.find_Credit_index_in_string(test_text)
+    
+    기준 공식
+    intr = Credit*3
+    Cap*((1 + intr/100)**n)/(12*n)
     '''
 
+    # 신용등급 문자열 > 수
+    Credit = Credit[0].replace('등급','')
+    Credit = int(Credit[0])
+    
+    # 월 할부상환
+    NullList = []
+    for n in range(len(Debts)):
+        
+        #중액 중금리
+        if Debts[n][0] == '캐피탈': #5년 할부상환 6% 시작 2%가산
+            Nullver = Debts[n][2].replace('만원','')
+            
+            if len(Nullver) > 4:
+                Nullver = Nullver.replace(',','')
+                Nullver = int(Nullver)
+                
+                print('캐피탈')
+                DebtWithInt = (Nullver*((1+(6+Credit*2)/100)**5))/(12*5)
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+                
+            else:
+                Nullver = int(Nullver)
+                
+                print('캐피탈')
+                DebtWithInt = (Nullver*((1+(6+Credit*2)/100)**5))/(12*5)
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+            
+        if Debts[n][0] == '저축은행': #5년 할부상환 6% 시작 2%가산
+            Nullver = Debts[n][2].replace('만원','')
+            if len(Nullver) > 4:
+                Nullver = Nullver.replace(',','')
+                Nullver = int(Nullver)
+                
+                print('저축은행')                
+                DebtWithInt = (Nullver*((1+(6+Credit*2)/100)**5))/(12*5)
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+                
+            else:
+                Nullver = int(Nullver)
+                
+                print('저축은행')                
+                DebtWithInt = (Nullver*((1+(6+Credit*2)/100)**5))/(12*5)
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+            
+        if Debts[n][0] == 'P2P': #1년 만기
+            Nullver = Debts[n][2].replace('만원','')
+            if len(Nullver) > 4:
+                Nullver = Nullver.replace(',','')
+                Nullver = int(Nullver)
+                
+                print('P2P')
+                DebtWithInt = (Nullver*((1+Credit*3/100)**1))/(12*1)
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+                
+            else:
+                Nullver = int(Nullver)
+                
+                print('P2P')
+                DebtWithInt = (Nullver*((1+Credit*3/100)**1))/(12*1)
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+
+        # 소액 고금리
+        if Debts[n][0] == '보험': #5년 할부상환 12% 시작 1.5%가산
+            Nullver = Debts[n][2].replace('만원','')
+            if len(Nullver) > 4:
+                Nullver = Nullver.replace(',','')
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+(10.5+Credit*1.5)/100)**5))/(12*5)
+                print('보험')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+                
+            else:
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+(10.5+Credit*1.5)/100)**5))/(12*5)
+                print('보험')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+            
+        if Debts[n][0] == '카드': #5년 할부상환 12% 시작 1.5%가산
+            Nullver = Debts[n][2].replace('만원','')
+            if len(Nullver) > 4:
+                Nullver = Nullver.replace(',','')
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+(10.5+Credit*1.5)/100)**5))/(12*5)
+                print('카드')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+                
+            else:
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+(10.5+Credit*1.5)/100)**5))/(12*5)
+                print('카드')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+            
+        if Debts[n][0] == '현금서비스': #5년 할부상환 12% 시작 1.5%가산
+            Nullver = Debts[n][2].replace('만원','')
+            if len(Nullver) > 4:
+                Nullver = Nullver.replace(',','')
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+(10.5+Credit*1.5)/100)**5))/(12*5)
+                print('현금서비스')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+                
+            else:
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+(10.5+Credit*1.5)/100)**5))/(12*5)
+                print('현금서비스')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+        
+        # 고액 저금리
+        if Debts[n][0] == '은행': #은행은 마이너스 통장 금리
+            Nullver = Debts[n][2].replace('만원','')
+            if len(Nullver) > 4:
+                Nullver = Nullver.replace(',','')
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+Credit*3/(100))**10))/(12*10)
+                print('은행')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+                
+            else:
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+Credit*3/(100))**10))/(12*10)
+                print('은행')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+            
+        if Debts[n][0] == '담보': #부동산담보 부동산 담보는 신용등급 1로 가정
+            Nullver = Debts[n][2].replace('만원','')
+            if len(Nullver) > 4:
+                Nullver = Nullver.replace(',','')
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+1*3/(100))**20))/(12*20)
+                print('담보')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+                
+            else:
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+1*3/(100))**20))/(12*20)
+                print('담보')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+            
+        if Debts[n][0] == '학자금': #부동산담보 부동산 담보는 신용등급 1로 가정
+            Nullver = Debts[n][2].replace('만원','')
+            Nullver = Debts[n][2].replace('만원','')
+            if len(Nullver) > 4:
+                Nullver = Nullver.replace(',','')
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+1*3/(100))**15))/(12*15)
+                print('학자금')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+                
+            else:
+                Nullver = int(Nullver)
+                
+                DebtWithInt = (Nullver*((1+1*3/(100))**15))/(12*15)
+                print('학자금')
+                print(DebtWithInt)
+                NullList.append(DebtWithInt)
+    
+    return sum(NullList)
+
+#대출신청 정보 계산
+def lonereq(soup):
+    '''
+    세전 수익률, 상환기간, 모집금액(사람들이 넣은 돈), 대출금액(대출자가 모으고 싶은 돈)
+    '''
+    moneyList = []
+    
+    profit = soup.body.main.header.div.find_all('p')[3].text #수익률
+    profit = profit.replace('%', '')
+    profit = float(profit)
+    
+    period = soup.body.main.header.div.find_all('p')[5].text #상환기간
+    period = period.replace('개월', '')
+    period = int(period)
+    
+    
+    money = soup.body.main.header.div.find_all('p')[9].text #상환금액
+    money_gathering  = money.split('\n')[1].replace(' ', '') #모집금액(사람들이 넣은 돈)
+    money_gathering = int(money_gathering)
+    
+    money_gathered = money.split('\n')[3].replace(' ', '') #대출금액(대출자가 모으고 싶은 돈)
+    money_gathered = money_gathered.replace(',', '')
+    money_gathered = int(money_gathered)
+    
+    moneyList.append(profit) 
+    moneyList.append(period) 
+    moneyList.append(money_gathering) 
+    moneyList.append(money_gathered) 
+    return moneyList
+
+def NetIncome(test_text): #24%최대 이자로 일률적으로 적용하며 10년 만기로 설정한다. 추산이자채무상환액 = 원금/12*10(10년만기균등상환)+원금*3%이자(이자비용+ 쿠션1%)
+    #추가 대출금에 다한 반영X
+    '''
+    '''
+    Income = find_Income_index_in_string(test_text)[0]
+    Income = Income.replace('만원','')
+    Income = Income.replace(',','')
+    Income = int(Income)
+    Expense = find_Expense_index_in_string(test_text)[0]
+    Expense = Expense.replace('만원','')
+    Expense = Expense.replace(',','')
+    Expense = int(Expense)
+    
+    result = Income - (Expense)
+    return result
+
+def OverHead(test_text):
+    gain = NetIncome(test_text)
+
+    Debts = find_debt_index_in_string(test_text)
+
+    Credit = find_Credit_index_in_string(test_text)
+
+    soup = crawl_investment_individual()
+
+    lose = Debt_Calculation(Debts, Credit) + (lonereq(soup)[-1]*(1+lonereq(soup)[0]/100))/lonereq(soup)[1]
+
+    result = gain - lose
+
+    return result
+
+def RunAll():
+    '''soup = crawl_investment_individual()
+    name = ListOfBonds(soup)
+    
+    soupsub = Get_individual_data(name)
+    test_text = get_NLB(soup)
+    Income = find_Income_index_in_string(test_text)
+    result = []'''
+    #result = [1,2]
     pass
 
-def interestAndOverHead():
-    pass
+#RunAll()
