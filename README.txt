@@ -1,3 +1,15 @@
+프로그래밍 목적이다. P2P채권을 크롤링해서 대출심사를 자동화하기 위해 프로그래밍을 한다. 
+
+실행은 RunAll.py에 진행한다. 모든 모듈, 함수, 변수를 설명하고자 만들었다. 함수지향적 프로그래밍을 지향한다. 
+
+crawl_investment_individual()함수로 시작한다. 채권 전체 페이지의 채권번호를 가져온다.
+
+soup = crawl_investment_individual()으로 바인딩을 한다. 페이지 전체 데이터를 가져온다. 페이지 전체는 soup변수에 저장되어 있다.  
+
+ListOfBonds(soup)는 채권번호를 리스트화 한다. soup변수에서 채권번호만 뽑은 것이다. 이 채권번호가 페이지 주소로 활용할 수 있다. 나중에 for문에 넣고 돌릴 것이다. 
+
+밑의 내용은 무시해도 좋다. 앞으로 정리할 내용이다. 
+
 '''
 전체 파이프라인
 crawl_investment_individual()는 인자가 비어 있을 함수이다. 개인신용 채권의 html데이터를 축출한다. soup = crawl_investment_individual()
