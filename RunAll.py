@@ -1,18 +1,45 @@
-import baseForEight_Per_Cent
+import Eight_Per_Cent
+import GetFromMainPage
+import GetFromSub
+import FilterFromSubPage
+import Base_Eight_Per_Cent
+import Debt_Calculation
 
-soup = baseForEight_Per_Cent.crawl_investment_individual()
-name = ListOfBonds(soup)
-soup = Get_individual_data(name)
-test_text = get_NLB(soup)
+def RunAll():
+    #GetFromMainPage에서 가져올 것들
+    soup = GetFromMainPage.crawl_investment_individual()
+    name = GetFromMainPage.ListOfBonds(soup)
 
-find_P2P_debt(test_text) #부울 함수 True일 때 대출 거부
-get_missing_date(test_text) #True일 때 작업정지
+    #GetFromSubPage에서 가져올 것들
+    soup = GetFromSub.Get_individual_data(name, 0)
+    souptext = GetFromSub.get_NLB(soup)
+    
+    #FilterFromSubPage
+    Income = FilterFromSubPage.find_Income_index_in_string(souptext)
+    Expense = FilterFromSubPage.find_Expense_index_in_string(souptext)
+    Credit = FilterFromSubPage.find_Credit_index_in_string(souptext)
+    Debts = FilterFromSubPage.find_debt_index_in_string(souptext)
 
-Income = find_Income_index_in_string(test_text)
-Expense = find_Expense_index_in_string(test_text)
-Credit = find_Credit_index_in_string(test_text)
-Debts = find_debt_index_in_string(test_text)
+    #필수 정보 확인(채무유형 누락, 타사 P2P 이용)
+    FilterFromSubPage.get_missing_date(souptext)
+    FilterFromSubPage.find_P2P_debt(souptext)
 
-Debt_Calculation(Debts, Credit)
-OverHead(Income, Expense, Debt_Calculation(Debts, Credit))
+    InterestCost = Debt_Calculation.Debt_Calculation(Debts,Credit) #Debt_Calculation.py모듈인식 불가
 
+    FilterFromSubPage.lonereq(souptext)
+
+    result = Base_Eight_Per_Cent.OverHead(souptext, soup)
+    print(Income)
+    print(Expense)
+    print(InterestCost)
+    return result
+
+
+
+def exle():
+    '''
+    엑셀로 뽑자
+    '''
+    pass
+
+RunAll()
