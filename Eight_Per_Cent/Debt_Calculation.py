@@ -1,7 +1,7 @@
 
 
 
-def Debt_Calculation(Debts, Credit):
+def DebtAndCredit_Calculation(Debts, Credit):
     '''
     Debts = find_debt_index_in_string(test_text)
     Credit = Eight_Per_Cent.find_Credit_index_in_string(test_text)
