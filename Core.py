@@ -35,7 +35,7 @@ def RunAll():
     Eight_Per_Cent.FilterFromSubPage.get_missing_date(souptext)
     Eight_Per_Cent.FilterFromSubPage.find_P2P_debt(souptext)
 
-    InterestCost = Eight_Per_Cent.Debt_Calculation.Debt_Calculation(Debts,Credit) #Debt_Calculation.py모듈인식 불가
+    InterestCost = Eight_Per_Cent.Debt_Calculation.DebtAndCredit_Calculation(Debts,Credit) #Debt_Calculation.py모듈인식 불가
 
     Eight_Per_Cent.FilterFromSubPage.lonereq(souptext)
 
