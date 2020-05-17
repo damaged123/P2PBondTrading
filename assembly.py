@@ -592,9 +592,29 @@ def InterestCost(Debts, Credit):
     
     return sum(NullList)
 
+# 변수항목
+Cost_of_Interest = InterestCost(DebtData_List, Credit)
+
+# 함수항목
+def OverHead():
+    pass
+
+# 함수항목
+def Bond_index():
+    pass
+
+# 함수항목
+def Bond_req_ND(): #거절요건
+    pass
+
 # 함수항목
 '''def OutPut_spreadsheet(채권번호, 채권지수, 채권안정성, 거절요건성립):
 
+    #name = Filter_BondNum(soup) #채권번호
+    #index = Bond_index() #채권지수
+    #OverHead_List = OverHead()
+    #Lone_ND = Bond_req_ND()
+    
     testframe = pd.DataFrame({
         '채권번호':name,
         '안정성대비수익지수':range(len(name)),
