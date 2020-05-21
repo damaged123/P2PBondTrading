@@ -35,7 +35,7 @@ def crawl_MainPage(): # 개인 채권 홈페이지를 크롤링한다.
     #chrome_options.add_argument("--disable-gpu") # 보험  
 
     # 해드리스 탐지막기
-    chrome_options.add_argument("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36")
+    chrome_options.add_argument("???")
 
     # 웹드라이버 파일 주소
     driver = webdriver.Chrome('/Users/kimsanghyun/Lets_Get_rich/ZZ_chromedriver/chromedriver',chrome_options=chrome_options)
@@ -85,7 +85,7 @@ def crawl_SubPage(name, n):
     chrome_options = webdriver.ChromeOptions() #
     chrome_options.add_argument('--headless')
     #chrome_options.add_argument("--disable-gpu") # 보험  
-    chrome_options.add_argument("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36")
+    chrome_options.add_argument("???")
     driver = webdriver.Chrome('/Users/kimsanghyun/Lets_Get_rich/ZZ_chromedriver/chromedriver',chrome_options=chrome_options)
     driver.implicitly_wait(2)
 
