@@ -291,6 +291,7 @@ def Filter_Credit(test_text):
 # ['6등급', '662점']
 # Credit = Filter_Credit(SubSoupText)
 
+
 # 함수항목
 def Filter_lonereq(soup): #대출신청 정보 계산
     '''
@@ -298,7 +299,14 @@ def Filter_lonereq(soup): #대출신청 정보 계산
     '''
     moneyList = []
     
-    #soup.body.main.header.div
+    def str_to_float(strInBond):
+        if len(strInBond) > 4:
+            strInBond = strInBond.replace(',', '')
+            strInBond = float(strInBond)
+            return strInBond
+        else:
+            strInBond = float(strInBond)
+            return strInBond
 
     profit = soup.body.main.header.div.find_all('p')[3].text #수익률
     profit = profit.replace('%', '')
@@ -306,15 +314,15 @@ def Filter_lonereq(soup): #대출신청 정보 계산
     
     period = soup.body.main.header.div.find_all('p')[5].text #상환기간
     period = period.replace('개월', '')
-    period = float(period)
+    period = int(period)
     
     money = soup.body.main.header.div.find_all('p')[9].text #상환금액
+
     money_gathering  = money.split('\n')[1].replace(' ', '') #모집금액(사람들이 넣은 돈)
-    money_gathering = float(money_gathering)
+    money_gathering = str_to_float(money_gathering)
     
     money_gathered = money.split('\n')[3].replace(' ', '') #대출금액(대출자가 모으고 싶은 돈)
-    money_gathered = money_gathered.replace(',', '')
-    money_gathered = float(money_gathered)
+    money_gathered = str_to_float(money_gathered)
     
     moneyList.append(profit) 
     moneyList.append(period) 
